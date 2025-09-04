@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -8836849014656712232}
   - component: {fileID: 3501134710081866720}
   - component: {fileID: 8181459025788019905}
+  - component: {fileID: 4453369333882423221}
   m_Layer: 0
   m_Name: Player 2 (Blue Cube)
   m_TagString: Untagged
@@ -212,16 +213,16 @@ MonoBehaviour:
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
   AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
+  TickSyncChildren: 1
+  UseUnreliableDeltas: 1
   SyncPositionX: 1
-  SyncPositionY: 1
+  SyncPositionY: 0
   SyncPositionZ: 1
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
   SyncScaleX: 1
-  SyncScaleY: 1
+  SyncScaleY: 0
   SyncScaleZ: 1
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
@@ -229,8 +230,8 @@ MonoBehaviour:
   UseQuaternionSynchronization: 0
   UseQuaternionCompression: 0
   UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
+  InLocalSpace: 1
+  SwitchTransformSpaceWhenParented: 1
   Interpolate: 1
   SlerpPosition: 0
 --- !u!96 &8181459025788019905
@@ -340,3 +341,20 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
+--- !u!114 &4453369333882423221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6188108254289136151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1

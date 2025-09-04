@@ -4,6 +4,7 @@ using TMPro;
 using System.Linq;
 using Unity.Netcode;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class MenuManager : MonoBehaviour
 {
@@ -26,8 +27,8 @@ public class MenuManager : MonoBehaviour
     [Header("Gameplay Elements")]
     public GameObject gameStatusPanel;
     public TextMeshProUGUI gameStatusText;
-    public TextMeshProUGUI waitingStatusText; // New text for waiting status
-    public TextMeshProUGUI countdownText; // New text for countdown
+    public TextMeshProUGUI waitingStatusText;
+    public TextMeshProUGUI countdownText;
     public Button backToMenuButton;
     public Button restartButton;
     
@@ -41,8 +42,8 @@ public class MenuManager : MonoBehaviour
     public bool isConnecting = false;
     public bool isHosting = false;
     public bool gameStarted = false;
-    public bool isWaiting = false; // New state for waiting
-    public bool isCountingDown = false; // New state for countdown
+    public bool isWaiting = false;
+    public bool isCountingDown = false;
     
     [Header("Visual Settings")]
     public Color validIPColor = new Color(0.8f, 1f, 0.8f, 1f);
@@ -73,6 +74,17 @@ public class MenuManager : MonoBehaviour
     
     void Start()
     {
+        // Check for EventSystem - just log, don't create
+        EventSystem eventSystem = FindFirstObjectByType<EventSystem>();
+        if (eventSystem == null)
+        {
+            Debug.LogError("No EventSystem found in scene! Please create one through GameObject > UI > Event System");
+        }
+        else
+        {
+            Debug.Log("EventSystem found in scene");
+        }
+        
         // Find missing UI components automatically
         FindMissingComponents();
         
@@ -90,6 +102,26 @@ public class MenuManager : MonoBehaviour
         
         // Setup IP validation
         SetupIPValidation();
+        
+        // Force enable all buttons
+        StartCoroutine(EnableAllButtonsAfterDelay());
+    }
+    
+    // New method to enable all buttons after a short delay
+    private IEnumerator EnableAllButtonsAfterDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        
+        // Force enable all buttons
+        if (hostButton != null) hostButton.interactable = true;
+        if (joinButton != null) joinButton.interactable = true;
+        if (searchButton != null) searchButton.interactable = true;
+        if (quitButton != null) quitButton.interactable = true;
+        if (backToMenuButton != null) backToMenuButton.interactable = true;
+        if (restartButton != null) restartButton.interactable = true;
+        if (ipInputField != null) ipInputField.interactable = true;
+        
+        Debug.Log("All buttons force enabled after delay");
     }
     
     private void FindMissingComponents()
@@ -216,8 +248,8 @@ public class MenuManager : MonoBehaviour
     
     void Update()
     {
-        // Handle connection timeout
-        if (isConnecting)
+        // Handle connection timeout (only for clients, not host)
+        if (isConnecting && !isHosting)
         {
             connectionTimer += Time.deltaTime;
             if (connectionTimer >= connectionTimeout)
@@ -278,23 +310,41 @@ public class MenuManager : MonoBehaviour
     {
         // Main menu buttons
         if (hostButton != null)
+        {
             hostButton.onClick.AddListener(OnHostButtonClicked);
+            Debug.Log("Host button listener added");
+        }
             
         if (joinButton != null)
+        {
             joinButton.onClick.AddListener(OnJoinButtonClicked);
+            Debug.Log("Join button listener added");
+        }
             
         if (searchButton != null)
+        {
             searchButton.onClick.AddListener(OnSearchButtonClicked);
+            Debug.Log("Search button listener added");
+        }
             
         if (quitButton != null)
+        {
             quitButton.onClick.AddListener(OnQuitButtonClicked);
+            Debug.Log("Quit button listener added");
+        }
         
         // Gameplay buttons
         if (backToMenuButton != null)
+        {
             backToMenuButton.onClick.AddListener(OnBackToMenuButtonClicked);
+            Debug.Log("Back to menu button listener added");
+        }
             
         if (restartButton != null)
+        {
             restartButton.onClick.AddListener(OnRestartButtonClicked);
+            Debug.Log("Restart button listener added");
+        }
     }
     
     private void SetupNetworkCallbacks()
@@ -327,6 +377,7 @@ public class MenuManager : MonoBehaviour
     
     private void OnHostButtonClicked()
     {
+        Debug.Log("Host button clicked!");
         if (isConnecting || isConnected) 
         {
             UpdateStatus("Already connected or connecting!");
@@ -352,6 +403,7 @@ public class MenuManager : MonoBehaviour
     
     private void OnJoinButtonClicked()
     {
+        Debug.Log("Join button clicked!");
         if (isConnecting || isConnected) 
         {
             UpdateStatus("Already connected or connecting!");
@@ -391,6 +443,7 @@ public class MenuManager : MonoBehaviour
     
     private void OnSearchButtonClicked()
     {
+        Debug.Log("Search button clicked!");
         // Show common IP ranges and local IP
         UpdateStatus("Searching for games...");
         
@@ -407,6 +460,7 @@ public class MenuManager : MonoBehaviour
     
     private void OnBackToMenuButtonClicked()
     {
+        Debug.Log("Back to menu button clicked!");
         // Confirm disconnection
         if (isConnected)
         {
@@ -419,12 +473,14 @@ public class MenuManager : MonoBehaviour
     
     private void OnRestartButtonClicked()
     {
+        Debug.Log("Restart button clicked!");
         ShowGameStatus("Restarting game...");
         RestartGame();
     }
     
     private void OnQuitButtonClicked()
     {
+        Debug.Log("Quit button clicked!");
         ShowQuitConfirmation();
     }
     
@@ -443,14 +499,29 @@ public class MenuManager : MonoBehaviour
                 isConnecting = false;
                 isConnected = true;
                 
-                // Show gameplay after a short delay
-                Invoke(nameof(ShowGameplay), 1f);
+                // Ensure gameplay state is properly set
+                if (isHosting)
+                {
+                    // If hosting, show gameplay immediately
+                    ShowGameplay();
+                }
+                else
+                {
+                    // If client, show gameplay after a short delay
+                    Invoke(nameof(ShowGameplay), 1f);
+                }
                 
                 Debug.Log($"Client {clientId} connected successfully");
             }
             else
             {
-                // Another client connected
+                // Another client connected - spawn their player
+                PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
+                if (spawner != null)
+                {
+                    spawner.SpawnPlayerForClient(clientId);
+                }
+                
                 if (isHosting && !isCountingDown && !gameStarted)
                 {
                     // Start countdown when another player joins
@@ -683,6 +754,8 @@ public class MenuManager : MonoBehaviour
     
     public void ShowMainMenu()
     {
+        Debug.Log("Showing main menu");
+        
         // Show main menu
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(true);
@@ -714,11 +787,16 @@ public class MenuManager : MonoBehaviour
         // Reset IP validation
         ValidateCurrentIP();
         
+        // Hide joystick
+        HideJoystick();
+        
         Debug.Log("Main menu shown");
     }
     
     public void ShowGameplay()
     {
+        Debug.Log("Showing gameplay");
+        
         // Hide main menu
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
@@ -774,7 +852,51 @@ public class MenuManager : MonoBehaviour
             }
         }
         
+        // Show joystick when gameplay starts
+        ShowJoystick();
+        
         Debug.Log("Gameplay shown");
+    }
+    
+    // Called when host starts successfully
+    public void HostStartedSuccessfully()
+    {
+        Debug.Log("Host started successfully");
+        
+        // Update connection state
+        isConnecting = false;
+        isConnected = true;
+        isHosting = true;
+        
+        // Show gameplay immediately
+        ShowGameplay();
+        
+        // Update status
+        UpdateStatus("Host started successfully!");
+    }
+    
+    // Show joystick
+    public void ShowJoystick()
+    {
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.mobileJoystick != null)
+        {
+            MobileInputManager.Instance.mobileJoystick.gameObject.SetActive(true);
+            Debug.Log("Mobile joystick shown");
+        }
+        else
+        {
+            Debug.LogWarning("Mobile joystick not found");
+        }
+    }
+    
+    // Hide joystick
+    public void HideJoystick()
+    {
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.mobileJoystick != null)
+        {
+            MobileInputManager.Instance.mobileJoystick.gameObject.SetActive(false);
+            Debug.Log("Mobile joystick hidden");
+        }
     }
     
     #endregion
@@ -838,28 +960,51 @@ public class MenuManager : MonoBehaviour
     
     private void SetInteractableState(bool interactable)
     {
+        Debug.Log($"Setting interactable state to: {interactable}");
+        
         // Enable/disable main menu buttons
         if (hostButton != null)
+        {
             hostButton.interactable = interactable;
+            Debug.Log($"Host button interactable: {hostButton.interactable}");
+        }
             
         if (joinButton != null)
+        {
             joinButton.interactable = interactable && (ipInputField != null ? IsValidIPAddress(ipInputField.text) : false);
+            Debug.Log($"Join button interactable: {joinButton.interactable}");
+        }
             
         if (searchButton != null)
+        {
             searchButton.interactable = interactable;
+            Debug.Log($"Search button interactable: {searchButton.interactable}");
+        }
             
         if (ipInputField != null)
+        {
             ipInputField.interactable = interactable;
+            Debug.Log($"IP input field interactable: {ipInputField.interactable}");
+        }
         
         if (quitButton != null)
+        {
             quitButton.interactable = interactable;
+            Debug.Log($"Quit button interactable: {quitButton.interactable}");
+        }
             
         // Enable/disable gameplay buttons
         if (backToMenuButton != null)
+        {
             backToMenuButton.interactable = !interactable;
+            Debug.Log($"Back to menu button interactable: {backToMenuButton.interactable}");
+        }
             
         if (restartButton != null)
+        {
             restartButton.interactable = !interactable;
+            Debug.Log($"Restart button interactable: {restartButton.interactable}");
+        }
     }
     
     private void ShowSearchResults()
@@ -930,13 +1075,31 @@ public class MenuManager : MonoBehaviour
         // Show game started message
         ShowGameStatus("Game started!");
         
+        // Enable player controls
+        EnablePlayerControls();
+        
         Debug.Log("Game started");
+    }
+    
+    // Enable player controls
+    private void EnablePlayerControls()
+    {
+        // Find all player controllers and enable their controls
+        CubePlayerController[] players = FindObjectsByType<CubePlayerController>(FindObjectsSortMode.None);
+        foreach (var player in players)
+        {
+            if (player.IsOwner)
+            {
+                player.EnableControls(true);
+                Debug.Log($"Enabled controls for {player.gameObject.name}");
+            }
+        }
     }
     
     private void RestartGame()
     {
         // Reset all players
-        CubePlayerController[] players = FindObjectsOfType<CubePlayerController>();
+        CubePlayerController[] players = FindObjectsByType<CubePlayerController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var player in players)
         {
             player.ResetPlayer();
@@ -996,13 +1159,20 @@ public class MenuManager : MonoBehaviour
         }
         
         SetInteractableState(true);
+        
+        // Hide joystick when disconnected
+        HideJoystick();
     }
     
     private void HandleConnectionTimeout()
     {
-        UpdateStatus("Connection timeout! Please try again.");
-        ResetConnectionState();
-        ShakeIPInputField();
+        // Only show timeout if we're actually trying to join (not host)
+        if (!isHosting)
+        {
+            UpdateStatus("Connection timeout! Please try again.");
+            ResetConnectionState();
+            ShakeIPInputField();
+        }
     }
     
     #endregion
@@ -1067,7 +1237,7 @@ public class MenuManager : MonoBehaviour
     {
         if (isConnected)
         {
-            string playerType = player.GetComponent<CubePlayerController>().IsHost ? "Host" : "Client";
+            string playerType = player.GetComponent<CubePlayerController>().IsHostPlayer ? "Host" : "Client";
             
             if (gameStarted)
             {

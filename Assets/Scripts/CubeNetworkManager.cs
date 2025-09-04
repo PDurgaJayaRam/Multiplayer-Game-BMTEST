@@ -37,14 +37,27 @@ public class CubeNetworkManager : MonoBehaviour
     
     public void StartHost()
     {
-        if (networkManager.StartHost())
+        if (networkManager != null)
         {
-            string localIP = GetLocalIPAddress();
-            MenuManager.Instance.UpdateStatus("Hosting on: " + localIP);
+            // Start host without connecting to a server
+            bool success = networkManager.StartHost();
+            
+            if (success)
+            {
+                string localIP = GetLocalIPAddress();
+                MenuManager.Instance.UpdateStatus("Hosting on: " + localIP);
+                
+                // Immediately show gameplay for host
+                MenuManager.Instance.HostStartedSuccessfully();
+            }
+            else
+            {
+                MenuManager.Instance.UpdateStatus("Failed to start host");
+            }
         }
         else
         {
-            MenuManager.Instance.UpdateStatus("Failed to start host");
+            MenuManager.Instance.UpdateStatus("NetworkManager not found!");
         }
     }
     

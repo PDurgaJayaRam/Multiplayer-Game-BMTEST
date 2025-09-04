@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -2633357315613675822}
   - component: {fileID: -5941449383992484383}
   - component: {fileID: 4675074620794299724}
+  - component: {fileID: 2798343019820001367}
   m_Layer: 0
   m_Name: Player 1 (Red Cube)
   m_TagString: Untagged
@@ -212,16 +213,16 @@ MonoBehaviour:
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
   AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
+  TickSyncChildren: 1
+  UseUnreliableDeltas: 1
   SyncPositionX: 1
-  SyncPositionY: 1
+  SyncPositionY: 0
   SyncPositionZ: 1
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
   SyncScaleX: 1
-  SyncScaleY: 1
+  SyncScaleY: 0
   SyncScaleZ: 1
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
@@ -229,8 +230,8 @@ MonoBehaviour:
   UseQuaternionSynchronization: 0
   UseQuaternionCompression: 0
   UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
+  InLocalSpace: 1
+  SwitchTransformSpaceWhenParented: 1
   Interpolate: 1
   SlerpPosition: 0
 --- !u!96 &4675074620794299724
@@ -340,3 +341,20 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
+--- !u!114 &2798343019820001367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7069278047809880723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
